@@ -15,18 +15,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-// import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Jika menggunakan JWT Filter
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Untuk @PreAuthorize jika diperlukan
+@EnableMethodSecurity // Mengaktifkan anotasi seperti @PreAuthorize
 public class SecurityConfig {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    // Jika menggunakan JWT Filter, Anda perlu AuthEntryPointJwt dan AuthTokenFilter
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
@@ -48,15 +46,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) // Pastikan ini ada untuk handling JWT
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth ->
-                    auth.requestMatchers("api/v1/admin/signup", "api/v1/admin/login", "api/v1/mahasiswa/login").permitAll()
-                        // .requestMatchers("/admin/**").hasRole("ADMIN") // Opsi: Lebih spesifik untuk role
-                        .anyRequest().authenticated() 
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "api/v1/admin/signup",
+                    "api/v1/admin/login",
+                    "api/v1/mahasiswa/login",
+                    "/api/v1/ws/**"
+                ).permitAll()
+                .anyRequest().authenticated()
             );
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class); // Pastikan JWT Filter aktif
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

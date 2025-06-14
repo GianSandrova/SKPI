@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class CheckinRequestDto {
-    @NotBlank(message = "Check-in notes cannot be empty") // Menggunakan T-ERR-009
+    @NotBlank(message = "Check-in notes cannot be empty") 
     private String notesCheckin;
 }

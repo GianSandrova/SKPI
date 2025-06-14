@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
         logger.error("Custom Error Exception: Code - {}, Display Message - {}", ex.getMessageCode(), ex.getDisplayMessage(), ex);
         
         GlobalResponse<Object> response = GlobalResponse.error(
-                ex.getDisplayMessage(), // <-- PERUBAHAN: Gunakan display message dari exception
+                ex.getDisplayMessage(),
                 ex.getHttpStatus().value(),
                 ex.getStatusText()
         );
@@ -45,12 +45,8 @@ public class GlobalExceptionHandler {
 
         logger.error("Validation Error Details: {}", detailedErrorMessage, ex);
 
-        // Untuk pesan validasi, kita bisa langsung menampilkan detail errornya
-        // atau menggunakan pesan dari ResponseMessage yang memiliki placeholder,
-        // tapi menampilkan detail langsung lebih informatif untuk developer.
-        // Kita akan menampilkan detail error langsung ke user.
         GlobalResponse<Object> response = GlobalResponse.error(
-                detailedErrorMessage, // <-- PERUBAHAN: Tampilkan detail error validasi
+                detailedErrorMessage, 
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase()
         );
@@ -62,7 +58,7 @@ public class GlobalExceptionHandler {
         logger.error("Bad Credentials Error: {}", ResponseMessage.T_ERR_001, ex);
         
         GlobalResponse<Object> response = GlobalResponse.error(
-                ResponseMessage.T_ERR_001, // <-- PERUBAHAN: Gunakan pesan dari ResponseMessage
+                ResponseMessage.T_ERR_001, 
                 HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized"
         );
@@ -74,7 +70,7 @@ public class GlobalExceptionHandler {
         logger.error("Username Not Found Error (treated as Bad Credentials): {}", ResponseMessage.T_ERR_001, ex);
         
         GlobalResponse<Object> response = GlobalResponse.error(
-                ResponseMessage.T_ERR_001, // <-- PERUBAHAN: Gunakan pesan dari ResponseMessage
+                ResponseMessage.T_ERR_001,
                 HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized"
         );
@@ -86,7 +82,7 @@ public class GlobalExceptionHandler {
         logger.error("Generic Uncaught Exception: {}", ResponseMessage.T_ERR_002, ex);
         
         GlobalResponse<Object> response = GlobalResponse.error(
-                ResponseMessage.T_ERR_002, // <-- PERUBAHAN: Gunakan pesan dari ResponseMessage
+                ResponseMessage.T_ERR_002, 
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()
         );

@@ -34,9 +34,7 @@ import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-// import java.util.Collections; // Tidak terpakai di versi ini
 import java.util.List;
-// import java.util.Optional; // Tidak terpakai secara eksplisit di versi ini
 import java.util.stream.Collectors;
 
 @Service
@@ -166,8 +164,8 @@ public class StudentService {
                     throw new CustomErrorException("T-ERR-005", ResponseMessage.T_ERR_005, HttpStatus.NOT_FOUND);
                 });
 
-        User user = student.getUser(); // Ini akan memicu pengambilan data User jika LAZY
-        if (user == null) { // Pengecekan tambahan jika relasi user bisa null (meskipun di DDL not null)
+        User user = student.getUser(); 
+        if (user == null) { 
             logger.error("User data is missing for student id: {}", studentId);
             throw new CustomErrorException("T-ERR-005", "Associated user data not found for student.", HttpStatus.NOT_FOUND);
         }
@@ -183,7 +181,7 @@ public class StudentService {
                 .studentName(user.getName())
                 .nim(student.getNim())
                 .email(user.getEmail())
-                .attendanceData(attendanceRecordDtos) // Menggunakan field attendanceData (list)
+                .attendanceData(attendanceRecordDtos) 
                 .build();
     }
 
@@ -197,29 +195,25 @@ public class StudentService {
             throw new CustomErrorException("T-ERR-010", "Data Failed to be saved. NIM " + request.getNim() + " already exists.", HttpStatus.BAD_REQUEST);
         }
         
-        // Rule #2: Validasi 2 angka pertama NIM sesuai tahun berjalan
         String currentYearPrefix = String.valueOf(LocalDate.now().getYear()).substring(2);
         if (!request.getNim().startsWith(currentYearPrefix)) {
             throw new CustomErrorException("T-ERR-010", "Data Failed to be saved. First 2 digits of NIM must be '" + currentYearPrefix + "' for the current year.", HttpStatus.BAD_REQUEST);
         }
 
-        // 2. Buat dan simpan entitas User
         User newUser = User.builder()
-                .name(request.getStudentName().trim()) // trim() untuk memastikan tidak ada spasi di awal/akhir
+                .name(request.getStudentName().trim()) 
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(UserRole.MAHASISWA) // Role untuk mahasiswa
+                .role(UserRole.MAHASISWA) 
                 .build();
         User savedUser = userRepository.save(newUser);
 
-        // 3. Buat dan simpan entitas Student
         Student newStudent = Student.builder()
                 .nim(request.getNim())
-                .user(savedUser) // Hubungkan dengan User yang baru dibuat
+                .user(savedUser)
                 .build();
         Student savedStudent = studentRepository.save(newStudent);
 
-        // 4. Buat DTO Respons
         return StudentAttendanceDto.builder()
                 .studentId(savedStudent.getId())
                 .userId(savedUser.getId())
@@ -234,7 +228,6 @@ public class StudentService {
     public StudentAttendanceDto editStudent(Long studentId, EditStudentRequest request) {
         logger.info("Attempting to edit student with id: {}", studentId);
 
-        // 1. Cari mahasiswa yang akan di-edit
         Student studentToUpdate = studentRepository.findById(studentId)
                 .orElseThrow(() -> new CustomErrorException("T-ERR-005", ResponseMessage.T_ERR_005, HttpStatus.NOT_FOUND));
 
@@ -243,8 +236,6 @@ public class StudentService {
             throw new CustomErrorException("T-ERR-010", "Data failed to be saved. Associated user not found.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // 2. Validasi Keunikan Data (jika ada perubahan)
-        // Cek email, jika berubah dan sudah dipakai user lain
         if (!request.getEmail().equalsIgnoreCase(userToUpdate.getEmail())) {
             userRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
                 if (!existingUser.getId().equals(userToUpdate.getId())) {
@@ -253,7 +244,6 @@ public class StudentService {
             });
         }
 
-        // Cek NIM, jika berubah dan sudah dipakai student lain
         if (!request.getNim().equals(studentToUpdate.getNim())) {
             studentRepository.findByNim(request.getNim()).ifPresent(existingStudent -> {
                 if (!existingStudent.getId().equals(studentId)) {
@@ -262,25 +252,19 @@ public class StudentService {
             });
         }
         
-        // Cek validasi prefix NIM sesuai tahun join mahasiswa
         LocalDate joinDate = studentToUpdate.getCreatedAt().toLocalDate();
         String yearPrefix = String.valueOf(joinDate.getYear()).substring(2);
         if (!request.getNim().startsWith(yearPrefix)) {
              throw new CustomErrorException("T-ERR-010", "Data Failed to be saved. First 2 digits of NIM must be '" + yearPrefix + "' according to join date.", HttpStatus.BAD_REQUEST);
         }
 
-        // 3. Update data di entitas
         userToUpdate.setName(request.getStudentName().trim());
         userToUpdate.setEmail(request.getEmail());
         studentToUpdate.setNim(request.getNim());
 
-        // 4. Simpan perubahan. Karena ada @Transactional, Spring Data JPA akan otomatis
-        // menyimpan perubahan pada entitas yang di-manage (studentToUpdate dan userToUpdate).
-        // studentRepository.save(studentToUpdate); // Pemanggilan save() eksplisit juga tidak masalah.
 
         logger.info("Successfully updated data for student with id: {}", studentId);
 
-        // 5. Kembalikan data lengkap sesuai kontrak API
         return getStudentDetailsWithAllAttendance(studentId);
     }
 

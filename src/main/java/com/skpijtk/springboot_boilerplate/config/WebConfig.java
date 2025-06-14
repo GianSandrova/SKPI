@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        // Menambahkan prefix "/api/v1" ke semua controller yang memiliki anotasi @RestController
+        // Tambahkan prefix "/api/v1" secara otomatis ke semua controller beranotasi @RestController
         configurer.addPathPrefix("/api/v1", HandlerTypePredicate.forAnnotation(RestController.class));
     }
 }

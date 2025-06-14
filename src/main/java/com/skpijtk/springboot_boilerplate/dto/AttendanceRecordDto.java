@@ -1,7 +1,7 @@
 package com.skpijtk.springboot_boilerplate.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.skpijtk.springboot_boilerplate.model.CheckInStatus; // Asumsi Enum ini sudah ada
+import com.skpijtk.springboot_boilerplate.model.CheckInStatus; 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,8 +26,8 @@ public class AttendanceRecordDto {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate attendanceDate;
 
-    private boolean late; // true jika check_in_status == TERLAMBAT
+    private boolean late; 
     private String notesCheckin;
     private String notesCheckout;
-    private CheckInStatus status; // Menggunakan enum CheckInStatus
+    private CheckInStatus status; 
 }

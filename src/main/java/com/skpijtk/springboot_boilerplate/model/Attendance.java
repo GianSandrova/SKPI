@@ -1,64 +1,97 @@
 package com.skpijtk.springboot_boilerplate.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Entity yang merepresentasikan data kehadiran mahasiswa.
+ * Setiap entri bersifat unik berdasarkan kombinasi student dan tanggal (attendance_date).
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "attendance", // Sesuai DDL
+@Table(
+    name = "attendance",
     uniqueConstraints = {
-        // Nama constraint di DDL: uq_student_attendance_date
-        // Kolom di DDL: student_id, attendance_date
-        @UniqueConstraint(name = "uq_student_attendance_date", columnNames = {"student_id", "attendance_date"})
+        @UniqueConstraint(
+            name = "uq_student_attendance_date",
+            columnNames = {"student_id", "attendance_date"}
+        )
     }
 )
 public class Attendance {
 
+    /**
+     * Primary key (auto increment).
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Foreign key ke tabel students
-    @ManyToOne(fetch = FetchType.LAZY)
+    /**
+     * Mahasiswa yang melakukan check-in.
+     * Relasi Many-to-One dengan entitas Student.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", referencedColumnName = "id", nullable = false)
     private Student student;
 
+    /**
+     * Tanggal kehadiran (tanpa jam).
+     */
     @Column(name = "attendance_date", nullable = false)
-    private LocalDate attendanceDate; // DDL: DATE
+    private LocalDate attendanceDate;
 
+    /**
+     * Waktu check-in (boleh null jika belum absen).
+     */
     @Column(name = "check_in_time")
-    private LocalDateTime checkInTime; // DDL: DATETIME
+    private LocalDateTime checkInTime;
 
+    /**
+     * Status check-in: TEPAT_WAKTU atau TERLAMBAT.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "check_in_status")
-    private CheckInStatus checkInStatus; // DDL: ENUM('TEPAT_WAKTU', 'TERLAMBAT')
+    private CheckInStatus checkInStatus;
 
-    @Lob // Menandakan Large Object
-    @Column(name = "check_in_notes", columnDefinition = "TEXT") // Eksplisit mapping ke TEXT MySQL
-    private String checkInNotes; // DDL: TEXT
+    /**
+     * Catatan opsional saat check-in.
+     */
+    @Lob
+    @Column(name = "check_in_notes", columnDefinition = "TEXT")
+    private String checkInNotes;
 
+    /**
+     * Waktu check-out (boleh null jika belum absen keluar).
+     */
     @Column(name = "check_out_time")
-    private LocalDateTime checkOutTime;// DDL: DATETIME
+    private LocalDateTime checkOutTime;
 
-    @Lob // Menandakan Large Object
-    @Column(name = "check_out_notes", columnDefinition = "TEXT") // Eksplisit mapping ke TEXT MySQL
-    private String checkOutNotes; // DDL: TEXT
+    /**
+     * Catatan opsional saat check-out.
+     */
+    @Lob
+    @Column(name = "check_out_notes", columnDefinition = "TEXT")
+    private String checkOutNotes;
 
+    /**
+     * Timestamp otomatis saat record dibuat.
+     */
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Timestamp otomatis saat record terakhir diperbarui.
+     */
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;

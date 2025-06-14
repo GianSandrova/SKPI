@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppSettingsRepository extends JpaRepository<AppSettings, Integer> {
-    // Kita akan menggunakan method findById(1) yang sudah disediakan JpaRepository
+    
 }

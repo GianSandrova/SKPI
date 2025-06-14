@@ -18,11 +18,10 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "appsettings") // Sesuai dengan nama tabel di DDL Anda
+@Table(name = "appsettings") 
 public class AppSettings {
 
     @Id
-    // Kita tidak menggunakan @GeneratedValue karena ID-nya tetap '1'
     @Column(name = "id")
     private Integer id;
 
@@ -38,7 +37,7 @@ public class AppSettings {
     @Column(name = "check_out_late_tolerance_minutes", nullable = false)
     private Integer checkOutLateToleranceMinutes;
 
-    @UpdateTimestamp // Otomatis mengisi waktu saat baris di-update
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt; // Tipe data TIMESTAMP dipetakan ke LocalDateTime
+    private LocalDateTime updatedAt; 
 }

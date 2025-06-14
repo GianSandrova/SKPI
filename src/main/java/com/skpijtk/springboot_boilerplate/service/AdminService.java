@@ -16,51 +16,62 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Service yang menangani fitur-fitur khusus untuk Admin seperti pengambilan profil.
+ */
 @Service
 public class AdminService {
 
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Mengambil profil admin yang sedang login berdasarkan data dalam Authentication.
+     *
+     * @param authentication objek Spring Security Authentication.
+     * @return response data berisi nama admin, role, dan waktu saat ini (format lokal Indonesia).
+     * @throws CustomErrorException jika user tidak ditemukan, bukan admin, atau token tidak valid.
+     */
     @Transactional(readOnly = true)
     public AdminProfileResponseData getAdminProfile(Authentication authentication) {
+        // Validasi autentikasi
         if (authentication == null || !authentication.isAuthenticated()) {
-            // Sesuai API Contract "Gagal Get Profile Admin" -> T-ERR-006, atau T-ERR-001 untuk unauthorized
-            // Untuk kasus token tidak valid/tidak ada, AuthEntryPointJwt akan handle dengan "T-ERR-001"
-            // Jika logika ini tetap diperlukan di service:
             throw new CustomErrorException(
-                "T-ERR-001", // Mengikuti standar untuk unauthorized
-                ResponseMessage.T_ERR_001, // Display message untuk logging
+                "T-ERR-001",
+                ResponseMessage.T_ERR_001,
                 HttpStatus.UNAUTHORIZED
             );
         }
 
+        // Ambil email dari token JWT
         String email = authentication.getName();
+
+        // Ambil user berdasarkan email
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomErrorException(
-                        "T-ERR-006", // Sesuai API Contract "Gagal Get Profile Admin"
-                        ResponseMessage.T_ERR_006, // Display message "Data failed to display." (meskipun kurang pas untuk user not found)
-                        HttpStatus.NOT_FOUND // Atau sesuaikan status code jika T-ERR-006 punya status code spesifik di kontrak
+                        "T-ERR-006",
+                        ResponseMessage.T_ERR_006,
+                        HttpStatus.NOT_FOUND
                 ));
 
+        // Pastikan role user adalah ADMIN
         if (user.getRole() != UserRole.ADMIN) {
             throw new CustomErrorException(
-                    "T-ERR-006", // Sesuai API Contract "Gagal Get Profile Admin"
-                    ResponseMessage.T_ERR_006, // Display message (kurang pas, tapi mengikuti kode)
-                    HttpStatus.FORBIDDEN // Atau status code lain jika T-ERR-006 punya mapping spesifik
+                    "T-ERR-006",
+                    ResponseMessage.T_ERR_006,
+                    HttpStatus.FORBIDDEN
             );
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", new Locale("id", "ID"));
-        String formattedTime = now.format(formatter);
+        // Format waktu saat ini dengan locale Indonesia
+        String formattedTime = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", new Locale("id", "ID")));
 
+        // Bangun dan return response
         return AdminProfileResponseData.builder()
                 .name(user.getName())
                 .role(user.getRole())
                 .time(formattedTime)
                 .build();
     }
-
-    // Anda bisa menambahkan method lain khusus admin di sini nantinya
 }

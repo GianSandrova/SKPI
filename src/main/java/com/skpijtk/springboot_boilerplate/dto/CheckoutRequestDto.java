@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class CheckoutRequestDto {
-    @NotBlank(message = "Check-out notes cannot be empty") // Menggunakan T-ERR-009
+    @NotBlank(message = "Check-out notes cannot be empty")
     private String notesCheckout;
 }

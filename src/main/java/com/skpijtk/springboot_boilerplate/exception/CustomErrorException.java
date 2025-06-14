@@ -5,13 +5,13 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class CustomErrorException extends RuntimeException {
-    private final String messageCode;       // Kode pesan, contoh: "T-ERR-001"
-    private final String displayMessage;    // Pesan deskriptif dari ResponseMessage.java
+    private final String messageCode;       
+    private final String displayMessage;   
     private final HttpStatus httpStatus;
     private final String statusText;
 
     public CustomErrorException(String messageCode, String displayMessage, HttpStatus httpStatus) {
-        super(displayMessage); // Pesan exception bisa tetap display message untuk logging internal
+        super(displayMessage); 
         this.messageCode = messageCode;
         this.displayMessage = displayMessage;
         this.httpStatus = httpStatus;

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList; // Atau gunakan GrantedAuthority berdasarkan role
+import java.util.ArrayList; 
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -21,11 +21,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // Jika Anda menggunakan Spring Security authorities, Anda bisa mapping UserRole ke GrantedAuthority
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                new ArrayList<>() // Tambahkan authorities jika perlu
+                new ArrayList<>() 
         );
     }
 }

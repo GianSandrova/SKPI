@@ -4,18 +4,21 @@ import com.skpijtk.springboot_boilerplate.dto.AppSettingsDto;
 import com.skpijtk.springboot_boilerplate.dto.GlobalResponse;
 import com.skpijtk.springboot_boilerplate.dto.UpdateAppSettingsRequestDto;
 import com.skpijtk.springboot_boilerplate.service.SettingsService;
-import jakarta.validation.Valid; 
+import com.skpijtk.springboot_boilerplate.util.ResponseMessage;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import com.skpijtk.springboot_boilerplate.util.ResponseMessage;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller untuk menangani permintaan terkait pengaturan sistem (system settings)
+ * yang hanya dapat diakses oleh pengguna dengan peran admin.
+ */
 @RestController
-@RequestMapping("/admin") 
+@RequestMapping("/admin")
 public class AdminSettingsController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminSettingsController.class);
@@ -23,13 +26,17 @@ public class AdminSettingsController {
     @Autowired
     private SettingsService settingsService;
 
+    /**
+     * Endpoint untuk mengambil data pengaturan aplikasi yang sedang aktif.
+     *
+     * @return response yang berisi data pengaturan aplikasi
+     */
     @GetMapping("/system-settings")
     public ResponseEntity<GlobalResponse<AppSettingsDto>> getSystemSettings() {
-        logger.info("Request received for /system-settings");
+        logger.info("Request received for GET /system-settings");
 
         AppSettingsDto settingsData = settingsService.getAppSettings();
 
-        // Kontrak: T-SUCC-005 atau T-SUCC-004. T-SUCC-005 ("Data successfully displayed.") lebih cocok.
         GlobalResponse<AppSettingsDto> response = GlobalResponse.success(
                 settingsData,
                 ResponseMessage.T_SUCC_005,
@@ -38,18 +45,25 @@ public class AdminSettingsController {
         return ResponseEntity.ok(response);
     }
 
-        @PutMapping("/system-settings")
+    /**
+     * Endpoint untuk memperbarui pengaturan aplikasi berdasarkan request yang dikirimkan admin.
+     * Validasi dijalankan secara otomatis berdasarkan anotasi @Valid.
+     *
+     * @param request objek DTO yang berisi data pengaturan baru
+     * @return response dengan data pengaturan terbaru setelah diperbarui
+     */
+    @PutMapping("/system-settings")
     public ResponseEntity<GlobalResponse<AppSettingsDto>> updateSystemSettings(
             @Valid @RequestBody UpdateAppSettingsRequestDto request) {
-        
-        logger.info("Request received to update /system-settings");
+
+        logger.info("Request received for PUT /system-settings");
 
         AppSettingsDto updatedSettingsData = settingsService.updateAppSettings(request);
 
         GlobalResponse<AppSettingsDto> response = GlobalResponse.success(
                 updatedSettingsData,
                 ResponseMessage.T_SUCC_008,
-                HttpStatus.OK 
+                HttpStatus.OK
         );
         return ResponseEntity.ok(response);
     }
